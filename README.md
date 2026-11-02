@@ -26,6 +26,12 @@ Solución local y verificable desarrollada para gestionar reservas de equipos de
   * `test_reservas.py`: Suite de pruebas automáticas con `pytest`.
   * `reservas.db`: Archivo de base de datos local para la persistencia.
 * **Decisiones técnicas:** Se utilizó **Python** junto con **SQLite** por su ligereza, soporte nativo de transacciones y facilidad de persistencia en archivo local sin requerir servicios externos[cite: 2].
+  
+* * **Ejemplo de uso (Entrada y Salida):**
+  * *Creación válida:* `crear_reserva("MIC-01", "Ana Pérez", "2026-11-10T10:00:00", "2026-11-10T11:00:00")` -> Retorna ID de reserva `1`.
+  * *Intento de superposición:* `crear_reserva("MIC-01", "Carlos Gómez", "2026-11-10T10:30:00", "2026-11-10T11:30:00")` -> Lanza `ValueError: El intervalo se superpone...`.
+  * *Límite consecutivo (Permitido):* `crear_reserva("MIC-01", "Carlos Gómez", "2026-11-10T11:00:00", "2026-11-10T12:00:00")` -> Retorna ID de reserva `2`.
+     
 * **Instrucciones de instalación y ejecución:**
   1. Instalar dependencias necesarias (ej. `pytest`):
      ```bash
