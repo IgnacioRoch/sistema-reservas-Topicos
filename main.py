@@ -137,5 +137,61 @@ def consultar_disponibilidad(unidad_id, inicio_str, fin_str):
     return not ocupado
 
 if __name__ == "__main__":
+    def menu_interactivo():
     inicializar_base_datos()
-    print("Base de datos inicializada correctamente.")
+    while True:
+        print("\n--- SISTEMA DE RESERVAS DE LABORATORIO ---")
+        print("1. Ver inventario")
+        print("2. Consultar disponibilidad")
+        print("3. Crear reserva")
+        print("4. Cancelar reserva")
+        print("5. Salir")
+        opcion = input("Seleccione una opción: ").strip()
+        
+        if opcion == "1":
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM inventario")
+            for row in cursor.fetchall():
+                print(f"ID: {row[0]} | Equipo: {row[1]}")
+            conn.close()
+            
+        elif opcion == "2":
+            uid = input("ID de unidad (ej. MIC-01): ").strip()
+            ini = input("Inicio (AAAA-MM-DDTHH:MM:SS): ").strip()
+            fin = input("Fin (AAAA-MM-DDTHH:MM:SS): ").strip()
+            try:
+                disp = consultar_disponibilidad(uid, ini, fin)
+                print(f"¿Disponible?: {'Sí' if disp else 'No'}")
+            except Exception as e:
+                print(f"Error: {e}")
+                
+        elif opcion == "3":
+            uid = input("ID de unidad: ").strip()
+            sol = input("Nombre del solicitante: ").strip()
+            ini = input("Inicio (AAAA-MM-DDTHH:MM:SS): ").strip()
+            fin = input("Fin (AAAA-MM-DDTHH:MM:SS): ").strip()
+            try:
+                rid = crear_reserva(uid, sol, ini, fin)
+                print(f"¡Reserva creada con éxito! ID de reserva: {rid}")
+            except Exception as e:
+                print(f"Error al reservar: {e}")
+                
+        elif opcion == "4":
+            try:
+                rid = int(input("ID de la reserva a cancelar: ").strip())
+                cancelar_reserva(rid)
+                print("¡Reserva cancelada exitosamente y horario liberado!")
+            except Exception as e:
+                print(f"Error al cancelar: {e}")
+                
+        elif opcion == "5":
+            print("Saliendo...")
+            break
+        else:
+            print("Opción inválida.")
+
+if __name__ == "__main__":
+    menu_interactivo()
+
+
