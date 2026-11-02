@@ -26,6 +26,24 @@ Solución local y verificable desarrollada para gestionar reservas de equipos de
   * `test_reservas.py`: Suite de pruebas automáticas con `pytest`.
   * `reservas.db`: Archivo de base de datos local para la persistencia.
 * **Decisiones técnicas:** Se utilizó **Python** junto con **SQLite** por su ligereza, soporte nativo de transacciones y facilidad de persistencia en archivo local sin requerir servicios externos[cite: 2].
+
+* ## 🧠 Desafíos Técnicos y Decisiones de Diseño
+
+Durante el desarrollo de la aplicación, se resolvieron diversos retos arquitectónicos y de lógica de negocio que garantizan la robustez y previsibilidad del sistema:
+
+### 1. Gestión de Intervalos Semiabiertos y Límites Consecutivos
+* **El reto:** Evitar falsos positivos en las superposiciones temporales permitiendo al mismo tiempo que una unidad pueda ser reservada de forma consecutiva (por ejemplo, que una reserva finalice exactamente a las 11:00 y otra comience a las 11:00 del mismo día).
+* **La solución:** Se implementó una lógica de intervalos semiabiertos matemáticos tipo $[inicio, fin)$, evaluando la condición estricta:
+  $$\text{inicio}_A < \text{fin}_B \quad \text{y} \quad \text{inicio}_B < \text{fin}_A$$
+  Esto permite que los límites colindantes coexistan sin que el sistema bloquee el traspaso de turnos entre usuarios.
+
+### 2. Cancelación Lógica vs. Eliminación Física
+* **El reto:** Cumplir con la regla de negocio que exige liberar los intervalos horarios de una unidad cancelada, pero preservando de manera inalterable la trazabilidad y el identificador único del registro histórico.
+* **La solución:** En lugar de ejecutar una sentencia `DELETE` en la base de datos, las cancelaciones operan mediante una **actualización de estado** (`ACTIVA` $\rightarrow$ `CANCELADA`). De este modo, las consultas de disponibilidad y superposición filtran únicamente las reservas activas, mientras que el historial general permanece intacto para auditorías futuras.
+
+### 3. Persistencia Transaccional con SQLite
+* **El reto:** Garantizar que los datos de inventario y reservas no se pierdan ante cierres inesperados de la aplicación, manteniendo una arquitectura ligera sin depender de servicios externos pesados.
+* **La solución:** Se integró el motor estándar `sqlite3` con un manejo controlado de conexiones transaccionales (`commit`/`rollback`). Esto asegura la atomicidad en la inserción de registros y permite que la base de datos se autogenere localmente de forma limpia en la primera ejecución.
   
 * * **Ejemplo de uso (Entrada y Salida):**
   * *Creación válida:* `crear_reserva("MIC-01", "Ana Pérez", "2026-11-10T10:00:00", "2026-11-10T11:00:00")` -> Retorna ID de reserva `1`.
