@@ -1,0 +1,11 @@
+# Entorno virtual y caché de Python
+__pycache__/
+.pytest_cache/
+venv/
+env/
+
+# Base de datos SQLite local y archivos temporales de transacciones
+data/reservas.db
+data/reservas.db-journal
+data/reservas.db-wal
+data/reservas.db-shm
